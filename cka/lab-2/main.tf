@@ -14,31 +14,40 @@ resource "aws_internet_gateway" "gateway" {
   tags  = var.tags
 }
 
-resource "aws_eip" "ip_cp_node" {
+resource "aws_eip" "eip" {
   vpc        = true
-  instance = aws_instance.cp-node.id
+  depends_on = [aws_internet_gateway.gateway]
 }
 
-resource "aws_route_table" "route-table-test-env" {
-  vpc_id = aws_vpc.main-vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.gateway.id
-  }
-
-  tags =var.tags
-}
-resource "aws_route_table_association" "subnet-association" {
-  subnet_id      = aws_subnet.public_subnet.id
-  route_table_id = aws_route_table.route-table-test-env.id
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.eip.id
+  subnet_id     = element(aws_subnet.public_subnet.*.id, 0)
+  depends_on    = [aws_internet_gateway.gateway]
+  tags = var.tags
 }
 
 resource "aws_subnet" "public_subnet" {
   cidr_block = "10.0.101.0/24"
   vpc_id = aws_vpc.main-vpc.id
   availability_zone = "${var.aws_region}${var.aws_main_availability_zone}"
+  #map_customer_owned_ip_on_launch = true
   tags  = var.tags
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main-vpc.id
+  tags = var.tags
+}
+
+resource "aws_route" "public_internet_gateway" {
+  route_table_id         = aws_route_table.public.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.gateway.id
+}
+
+resource "aws_route_table_association" "public" {
+  subnet_id      = aws_subnet.public_subnet.id
+  route_table_id = aws_route_table.public.id
 }
 
 resource "aws_security_group" "ssh" {

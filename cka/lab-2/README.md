@@ -17,4 +17,3 @@ Don't forget to teardown your resources:
 terraform destroy
 ````
 
-
