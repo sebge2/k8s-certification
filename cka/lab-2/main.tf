@@ -113,7 +113,21 @@ resource "aws_instance" "cp-node" {
   subnet_id                   = aws_subnet.public_subnet.id
   vpc_security_group_ids      = [aws_security_group.ssh.id, aws_security_group.cp.id]
 
-  user_data = file("${path.module}/node-init.sh")
+  user_data = file("${path.module}/cp-node-init.sh")
+
+  tags = var.tags
+}
+
+resource "aws_instance" "worker-node" {
+  ami           = "ami-0faab6bdbac9486fb"
+  instance_type = var.node_instance_type
+  key_name      = aws_key_pair.node_key.key_name
+
+  associate_public_ip_address = true
+  subnet_id                   = aws_subnet.public_subnet.id
+  vpc_security_group_ids      = [aws_security_group.ssh.id, aws_security_group.cp.id]
+
+  user_data = file("${path.module}/worker-node-init.sh")
 
   tags = var.tags
 }

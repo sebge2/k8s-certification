@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-# https://v1-28.docs.kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+# Install Kube Tools https://v1-28.docs.kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 
 # 1. Update the apt package index and install packages needed to use the Kubernetes apt repository:
 sudo apt-get update
@@ -20,7 +20,7 @@ sudo apt-get install -y kubelet=1.28.7-1.1 kubeadm=1.28.7-1.1 kubectl=1.28.7-1.1
 sudo apt-mark hold kubelet kubeadm kubectl
 
 
-# https://docs.docker.com/engine/install/ubuntu/
+# Install Docker https://docs.docker.com/engine/install/ubuntu/
 
 # 1. Add Docker's official GPG key:
 sudo apt-get update
@@ -44,6 +44,7 @@ sudo systemctl restart containerd
 
 # Configure System
 
+swapoff -a
 sudo modprobe overlay
 sudo modprobe br_netfilter
 
@@ -54,17 +55,3 @@ cat << EOF | sudo tee /etc/sysctl.d/kubernetes.conf
 EOF
 
 echo "$(hostname -i) k8scp" | sudo tee -a /etc/hosts
-
-
-# Install Control Pane
-
-cat << EOF | sudo tee /home/ubuntu/kubeadm-config.yaml
-apiVersion: kubeadm.k8s.io/v1beta3
-kind: ClusterConfiguration
-kubernetesVersion: 1.28.7
-controlPlaneEndpoint: "k8scp:6443"
-networking:
-  podSubnet: 10.0.101.0/24
-EOF
-
-sudo kubeadm init --config=/home/ubuntu/kubeadm-config.yaml --upload-certs | sudo tee /home/ubuntu/kubeadm-init.out
