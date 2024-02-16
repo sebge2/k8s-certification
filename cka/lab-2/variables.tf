@@ -30,7 +30,7 @@ variable "aws_secondary_availability_zone" {
 
 variable "node_instance_type" {
   description = "The EC2 instance type of nodes"
-  default = "t2.micro"
+  default = "t2.medium"
 }
 
 variable "node_public_key_path" {

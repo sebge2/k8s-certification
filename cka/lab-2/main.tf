@@ -14,16 +14,24 @@ resource "aws_internet_gateway" "gateway" {
   tags  = var.tags
 }
 
-resource "aws_eip" "nat_eip" {
+resource "aws_eip" "ip_cp_node" {
   vpc        = true
-  depends_on = [aws_internet_gateway.gateway]
+  instance = aws_instance.cp-node.id
 }
 
-resource "aws_nat_gateway" "nat" {
-  allocation_id = aws_eip.nat_eip.id
-  subnet_id     = aws_subnet.public_subnet.id
-  depends_on    = [aws_internet_gateway.gateway]
-  tags = var.tags
+resource "aws_route_table" "route-table-test-env" {
+  vpc_id = aws_vpc.main-vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gateway.id
+  }
+
+  tags =var.tags
+}
+resource "aws_route_table_association" "subnet-association" {
+  subnet_id      = aws_subnet.public_subnet.id
+  route_table_id = aws_route_table.route-table-test-env.id
 }
 
 resource "aws_subnet" "public_subnet" {
@@ -32,27 +40,6 @@ resource "aws_subnet" "public_subnet" {
   availability_zone = "${var.aws_region}${var.aws_main_availability_zone}"
   tags  = var.tags
 }
-
-#module "vpc" {
-#
-#  # We must have two AZs for EKS, but we'll only use the first one for the ASG
-#  # So place the one you want in first position
-#  azs = [
-#    "${var.aws_region}${var.aws_main_availability_zone}",
-#    "${var.aws_region}${var.aws_secondary_availability_zone}"
-#  ]
-#  private_subnets = [
-#    "10.0.1.0/24",
-#    "10.0.2.0/24"
-#  ]
-#  public_subnets = [
-#    "10.0.101.0/24",
-#    "10.0.102.0/24"
-#  ]
-#
-#  enable_nat_gateway = true
-#  single_nat_gateway = true
-#}
 
 resource "aws_security_group" "ssh" {
   vpc_id      = aws_vpc.main-vpc.id
