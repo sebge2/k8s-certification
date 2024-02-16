@@ -30,7 +30,6 @@ resource "aws_subnet" "public_subnet" {
   cidr_block = "10.0.101.0/24"
   vpc_id = aws_vpc.main-vpc.id
   availability_zone = "${var.aws_region}${var.aws_main_availability_zone}"
-  #map_customer_owned_ip_on_launch = true
   tags  = var.tags
 }
 
@@ -52,7 +51,7 @@ resource "aws_route_table_association" "public" {
 
 resource "aws_security_group" "ssh" {
   vpc_id      = aws_vpc.main-vpc.id
-  name        = var.default_resource_name
+  name        = "${var.default_resource_name}-ssh"
   description = "Security group that allows SSH connections"
 
   ingress {
@@ -61,6 +60,30 @@ resource "aws_security_group" "ssh" {
     ]
     from_port = 22
     to_port = 22
+    protocol = "tcp"
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = var.tags
+}
+
+resource "aws_security_group" "cp" {
+  vpc_id      = aws_vpc.main-vpc.id
+  name        = "${var.default_resource_name}-cp"
+  description = "Security group that allows Control Pane connections"
+
+  ingress {
+    cidr_blocks = [
+      "0.0.0.0/0"
+    ]
+    from_port = 6443
+    to_port = 6443
     protocol = "tcp"
   }
 
@@ -88,7 +111,7 @@ resource "aws_instance" "cp-node" {
 
   associate_public_ip_address = true
   subnet_id                   = aws_subnet.public_subnet.id
-  vpc_security_group_ids      = [aws_security_group.ssh.id]
+  vpc_security_group_ids      = [aws_security_group.ssh.id, aws_security_group.cp.id]
 
   user_data = file("${path.module}/node-init.sh")
 

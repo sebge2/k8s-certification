@@ -38,3 +38,9 @@ variable "node_public_key_path" {
   type        = string
   default = "~/.aws/k8-certification/node.pub"
 }
+
+variable "node_private_key_path" {
+  description = "The file Path to the node public SSH key."
+  type        = string
+  default = "~/.aws/k8-certification/node"
+}
