@@ -68,6 +68,9 @@ networking:
   podSubnet: 10.0.101.0/24
 EOF
 
+
+# Start Control Pane
+
 sudo kubeadm init --config=/home/ubuntu/kubeadm-config.yaml --upload-certs | sudo tee /home/ubuntu/kubeadm-init.out
 
 

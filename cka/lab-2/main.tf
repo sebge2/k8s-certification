@@ -63,13 +63,6 @@ resource "aws_security_group" "ssh" {
     protocol  = "tcp"
   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   tags = var.tags
 }
 
@@ -85,6 +78,72 @@ resource "aws_security_group" "cp" {
     from_port = 6443
     to_port   = 6443
     protocol  = "tcp"
+    description = "Kubernetes API server"
+  }
+
+  ingress {
+    cidr_blocks = [
+      "0.0.0.0/0"
+    ]
+    from_port = 2379
+    to_port   = 2380
+    protocol  = "tcp"
+    description = "etcd server client API"
+  }
+
+  ingress {
+    cidr_blocks = [
+      "0.0.0.0/0"
+    ]
+    from_port = 10259
+    to_port   = 10259
+    protocol  = "tcp"
+    description = "kube-scheduler"
+  }
+
+  ingress {
+    cidr_blocks = [
+      "0.0.0.0/0"
+    ]
+    from_port = 10257
+    to_port   = 10257
+    protocol  = "tcp"
+    description = "kube-controller manager"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = var.tags
+}
+
+resource "aws_security_group" "worker" {
+  vpc_id      = aws_vpc.main-vpc.id
+  name        = "${var.default_resource_name}-worker"
+  description = "Security group that allows Worker connections"
+
+  ingress {
+    cidr_blocks = [
+      "0.0.0.0/0"
+    ]
+    from_port = 10250
+    to_port   = 10250
+    protocol  = "tcp"
+    description = "Kubelet API"
+  }
+
+  ingress {
+    cidr_blocks = [
+      "0.0.0.0/0"
+    ]
+    from_port = 30000
+    to_port   = 32767
+    protocol  = "tcp"
+    description = "NodePort Services"
   }
 
   egress {
@@ -125,7 +184,7 @@ resource "aws_instance" "worker-node" {
 
   associate_public_ip_address = true
   subnet_id                   = aws_subnet.public_subnet.id
-  vpc_security_group_ids      = [aws_security_group.ssh.id, aws_security_group.cp.id]
+  vpc_security_group_ids      = [aws_security_group.ssh.id, aws_security_group.worker.id]
 
   user_data = file("${path.module}/worker-node-init.sh")
 

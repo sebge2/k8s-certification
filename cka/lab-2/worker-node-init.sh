@@ -53,5 +53,3 @@ cat << EOF | sudo tee /etc/sysctl.d/kubernetes.conf
     net.bridge.bridge-nf-call-iptables = 1
     net.ipv4.ip_forward = 1
 EOF
-
-echo "$(hostname -i) k8scp" | sudo tee -a /etc/hosts
