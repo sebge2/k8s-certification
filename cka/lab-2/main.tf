@@ -3,15 +3,15 @@ provider "aws" {
 }
 
 resource "aws_vpc" "main-vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
-  enable_dns_support = true
-  tags  = var.tags
+  enable_dns_support   = true
+  tags                 = var.tags
 }
 
 resource "aws_internet_gateway" "gateway" {
   vpc_id = aws_vpc.main-vpc.id
-  tags  = var.tags
+  tags   = var.tags
 }
 
 resource "aws_eip" "eip" {
@@ -23,19 +23,19 @@ resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.eip.id
   subnet_id     = element(aws_subnet.public_subnet.*.id, 0)
   depends_on    = [aws_internet_gateway.gateway]
-  tags = var.tags
+  tags          = var.tags
 }
 
 resource "aws_subnet" "public_subnet" {
-  cidr_block = "10.0.101.0/24"
-  vpc_id = aws_vpc.main-vpc.id
+  cidr_block        = "10.0.101.0/24"
+  vpc_id            = aws_vpc.main-vpc.id
   availability_zone = "${var.aws_region}${var.aws_main_availability_zone}"
-  tags  = var.tags
+  tags              = var.tags
 }
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main-vpc.id
-  tags = var.tags
+  tags   = var.tags
 }
 
 resource "aws_route" "public_internet_gateway" {
@@ -59,14 +59,14 @@ resource "aws_security_group" "ssh" {
       "0.0.0.0/0"
     ]
     from_port = 22
-    to_port = 22
-    protocol = "tcp"
+    to_port   = 22
+    protocol  = "tcp"
   }
 
   egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -83,14 +83,14 @@ resource "aws_security_group" "cp" {
       "0.0.0.0/0"
     ]
     from_port = 6443
-    to_port = 6443
-    protocol = "tcp"
+    to_port   = 6443
+    protocol  = "tcp"
   }
 
   egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -115,7 +115,7 @@ resource "aws_instance" "cp-node" {
 
   user_data = file("${path.module}/cp-node-init.sh")
 
-  tags = var.tags
+  tags = merge(var.tags, { Name : "${var.default_resource_name}-cp" })
 }
 
 resource "aws_instance" "worker-node" {
@@ -129,5 +129,5 @@ resource "aws_instance" "worker-node" {
 
   user_data = file("${path.module}/worker-node-init.sh")
 
-  tags = var.tags
+  tags = merge(var.tags, { Name : "${var.default_resource_name}-worker" })
 }
