@@ -17,14 +17,3 @@ Don't forget to clear down your resources:
 terraform destroy
 ````
 
-
-````
-apiVersion: v1
-kind: Config
-
-clusters:
-- cluster:
-    server: https://k8s.example.org/k8s/clusters/c-xxyyzz
-  name: lab2
-````
-
