@@ -180,6 +180,7 @@ sh -x /home/ubuntu/init-containerd.sh >> /home/ubuntu/init-containerd.log
 sh -x /home/ubuntu/init-system.sh >> /home/ubuntu/init-system.log
 sh -x /home/ubuntu/init-cp.sh >> /home/ubuntu/init-cp.log
 sh -x /home/ubuntu/init-helm.sh >> /home/ubuntu/init-helm.log
+sleep 120
 sh -x /home/ubuntu/init-cilium.sh >> /home/ubuntu/init-cilium.log
 sh -x /home/ubuntu/init-cp-tools.sh >> /home/ubuntu/init-cp-tools.log
 EOF
