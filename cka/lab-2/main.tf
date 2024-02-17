@@ -172,7 +172,29 @@ resource "aws_instance" "cp-node" {
   subnet_id                   = aws_subnet.public_subnet.id
   vpc_security_group_ids      = [aws_security_group.ssh.id, aws_security_group.cp.id]
 
-  user_data = file("${path.module}/cp-node-init.sh")
+  user_data = <<EOF
+#!/bin/bash
+
+sh -x /home/ubuntu/init-kube.sh >> /home/ubuntu/init-kube.log
+sh -x /home/ubuntu/init-containerd.sh >> /home/ubuntu/init-containerd.log
+sh -x /home/ubuntu/init-system.sh >> /home/ubuntu/init-system.log
+sh -x /home/ubuntu/init-cp.sh >> /home/ubuntu/init-cp.log
+sh -x /home/ubuntu/init-helm.sh >> /home/ubuntu/init-helm.log
+sh -x /home/ubuntu/init-cilium.sh >> /home/ubuntu/init-cilium.log
+sh -x /home/ubuntu/init-cp-tools.sh >> /home/ubuntu/init-cp-tools.log
+EOF
+
+  provisioner "file" {
+    source      = "./init-scripts/"
+    destination = "/home/ubuntu/"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file(var.node_private_key_path)
+      host        = self.public_ip
+    }
+  }
 
   tags = merge(var.tags, { Name : "${var.default_resource_name}-cp" })
 }
@@ -186,7 +208,25 @@ resource "aws_instance" "worker-node" {
   subnet_id                   = aws_subnet.public_subnet.id
   vpc_security_group_ids      = [aws_security_group.ssh.id, aws_security_group.worker.id]
 
-  user_data = file("${path.module}/worker-node-init.sh")
+  user_data = <<EOF
+#!/bin/bash
+
+sh -x /home/ubuntu/init-kube.sh >> /home/ubuntu/init-kube.log
+sh -x /home/ubuntu/init-containerd.sh >> /home/ubuntu/init-containerd.log
+sh -x /home/ubuntu/init-system.sh >> /home/ubuntu/init-system.log
+EOF
+
+  provisioner "file" {
+    source      = "./init-scripts/"
+    destination = "/home/ubuntu/"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file(var.node_private_key_path)
+      host        = self.public_ip
+    }
+  }
 
   tags = merge(var.tags, { Name : "${var.default_resource_name}-worker" })
 }

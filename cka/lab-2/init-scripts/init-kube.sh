@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # Install Kube Tools https://v1-28.docs.kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 # 1. Update the apt package index and install packages needed to use the Kubernetes apt repository:
 sudo apt-get update
@@ -17,36 +16,3 @@ echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.
 sudo apt-get update
 sudo apt-get install -y kubelet=1.28.7-1.1 kubeadm=1.28.7-1.1 kubectl=1.28.7-1.1
 sudo apt-mark hold kubelet kubeadm kubectl
-
-
-# Install Docker https://docs.docker.com/engine/install/ubuntu/
-# 1. Add Docker's official GPG key:
-sudo apt-get update
-sudo apt-get install ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-# 2. Add the repository to Apt sources:
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
-
-# 3. Install Docker
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-
-# 4. Configure containerd
-sudo containerd config default | tee /etc/containerd/config.toml
-sudo sed -e 's/SystemdCgroup = false/SystemdCgroup = true/g' -i /etc/containerd/config.toml
-sudo systemctl restart containerd
-
-
-# Configure System
-swapoff -a
-sudo modprobe overlay
-sudo modprobe br_netfilter
-
-cat << EOF | sudo tee /etc/sysctl.d/kubernetes.conf
-    net.bridge.bridge-nf-call-ip6tables = 1
-    net.bridge.bridge-nf-call-iptables = 1
-    net.ipv4.ip_forward = 1
-EOF
