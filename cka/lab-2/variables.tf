@@ -4,43 +4,48 @@ variable "default_resource_name" {
 
 variable "tags" {
   description = "Tags to add on resources"
-  default = {
-    Name: "k8s-certification"
+  default     = {
+    Name : "k8s-certification"
   }
   type = map(string)
 }
 
 variable "aws_region" {
   description = "The name of the AWS region"
-  default = "eu-central-1"
+  default     = "eu-central-1"
   type        = string
 }
 
 variable "aws_main_availability_zone" {
   description = "The name of the main AWS region"
-  default = "a"
+  default     = "a"
   type        = string
 }
 
 variable "aws_secondary_availability_zone" {
   description = "The name of the secondary AWS region"
-  default = "b"
+  default     = "b"
   type        = string
 }
 
 variable "node_instance_type" {
   description = "The EC2 instance type of nodes"
-  default = "t2.medium"
+  default     = "t2.medium"
+}
+
+variable "node_image_id" {
+  description = "AMI of node"
+  default     = "ami-0faab6bdbac9486fb"
 }
 
 variable "node_public_key_path" {
   description = "The file Path to the node public SSH key."
   type        = string
-  default = "~/.aws/k8-certification/node.pub"
+  default     = "~/.aws/k8-certification/node.pub"
 }
 
 variable "node_private_key_path" {
   description = "The file Path to the node public SSH key."
   type        = string
-  default = "~/.aws/k8-certification/node"
+  default     = "~/.aws/k8-certification/node"
 }

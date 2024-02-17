@@ -164,7 +164,7 @@ resource "aws_key_pair" "node_key" {
 }
 
 resource "aws_instance" "cp-node" {
-  ami           = "ami-0faab6bdbac9486fb"
+  ami           = var.node_image_id
   instance_type = var.node_instance_type
   key_name      = aws_key_pair.node_key.key_name
 
@@ -178,7 +178,7 @@ resource "aws_instance" "cp-node" {
 }
 
 resource "aws_instance" "worker-node" {
-  ami           = "ami-0faab6bdbac9486fb"
+  ami           = var.node_image_id
   instance_type = var.node_instance_type
   key_name      = aws_key_pair.node_key.key_name
 
