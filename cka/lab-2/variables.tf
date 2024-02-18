@@ -49,3 +49,9 @@ variable "node_private_key_path" {
   type        = string
   default     = "~/.aws/k8-certification/node"
 }
+
+variable "local_domain" {
+  description = "Local DNS domain"
+  type    = string
+  default = "sfeir.local"
+}

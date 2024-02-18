@@ -49,6 +49,18 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
+resource "aws_vpc_dhcp_options" "local-domain" {
+  domain_name          = var.local_domain
+  domain_name_servers  = ["AmazonProvidedDNS"]
+
+  tags = var.tags
+}
+
+resource "aws_vpc_dhcp_options_association" "local_dns_resolver" {
+  vpc_id          = aws_vpc.main-vpc.id
+  dhcp_options_id = aws_vpc_dhcp_options.local-domain.id
+}
+
 resource "aws_security_group" "ssh" {
   vpc_id      = aws_vpc.main-vpc.id
   name        = "${var.default_resource_name}-ssh"
@@ -69,7 +81,7 @@ resource "aws_security_group" "ssh" {
 resource "aws_security_group" "cp" {
   vpc_id      = aws_vpc.main-vpc.id
   name        = "${var.default_resource_name}-cp"
-  description = "Security group that allows Control Pane connections"
+  description = "Security group that allows Control plane connections"
 
   ingress {
     cidr_blocks = [
@@ -175,14 +187,18 @@ resource "aws_instance" "cp-node" {
   user_data = <<EOF
 #!/bin/bash
 
-sh -x /home/ubuntu/init-kube.sh >> /home/ubuntu/init-kube.log
-sh -x /home/ubuntu/init-containerd.sh >> /home/ubuntu/init-containerd.log
-sh -x /home/ubuntu/init-system.sh >> /home/ubuntu/init-system.log
-sh -x /home/ubuntu/init-cp.sh >> /home/ubuntu/init-cp.log
-sh -x /home/ubuntu/init-helm.sh >> /home/ubuntu/init-helm.log
+mkdir -p /home/ubuntu/logs
+sleep 60
+
+sh -x /home/ubuntu/init-kube.sh >> /home/ubuntu/logs/init-kube.log 2>&1
+sh -x /home/ubuntu/init-containerd.sh >> /home/ubuntu/logs/init-containerd.log 2>&1
+sh -x /home/ubuntu/init-system.sh >> /home/ubuntu/logs/init-system.log 2>&1
+sh -x /home/ubuntu/init-cp.sh >> /home/ubuntu/logs/init-cp.log 2>&1
+sh -x /home/ubuntu/init-helm.sh >> /home/ubuntu/logs/init-helm.log 2>&1
+sh -x /home/ubuntu/init-cp-tools.sh >> /home/ubuntu/logs/init-cp-tools.log 2>&1
+
 sleep 120
-sh -x /home/ubuntu/init-cilium.sh >> /home/ubuntu/init-cilium.log
-sh -x /home/ubuntu/init-cp-tools.sh >> /home/ubuntu/init-cp-tools.log
+sh -x /home/ubuntu/init-cilium.sh >> /home/ubuntu/logs/init-cilium.log 2>&1
 EOF
 
   provisioner "file" {
@@ -212,9 +228,12 @@ resource "aws_instance" "worker-node" {
   user_data = <<EOF
 #!/bin/bash
 
-sh -x /home/ubuntu/init-kube.sh >> /home/ubuntu/init-kube.log
-sh -x /home/ubuntu/init-containerd.sh >> /home/ubuntu/init-containerd.log
-sh -x /home/ubuntu/init-system.sh >> /home/ubuntu/init-system.log
+mkdir -p /home/ubuntu/logs
+sleep 60
+
+sh -x /home/ubuntu/init-kube.sh >> /home/ubuntu/logs/init-kube.log 2>&1
+sh -x /home/ubuntu/init-containerd.sh >> /home/ubuntu/logs/init-containerd.log 2>&1
+sh -x /home/ubuntu/init-system.sh >> /home/ubuntu/logs/init-system.log 2>&1
 EOF
 
   provisioner "file" {
@@ -230,4 +249,30 @@ EOF
   }
 
   tags = merge(var.tags, { Name : "${var.default_resource_name}-worker" })
+}
+
+resource "aws_route53_zone" "local" {
+  name = var.local_domain
+
+  vpc {
+    vpc_id = aws_vpc.main-vpc.id
+  }
+
+  tags = var.tags
+}
+
+resource "aws_route53_record" "cp-node" {
+  zone_id = aws_route53_zone.local.zone_id
+  name    = "cp.${var.local_domain}"
+  type    = "A"
+  ttl     = "300"
+  records = [aws_instance.cp-node.public_ip]
+}
+
+resource "aws_route53_record" "worker-node" {
+  zone_id = aws_route53_zone.local.zone_id
+  name    = "worker.${var.local_domain}"
+  type    = "A"
+  ttl     = "300"
+  records = [aws_instance.worker-node.public_ip]
 }
