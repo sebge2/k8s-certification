@@ -31,7 +31,7 @@ kubectl -n kube-system exec -it etcd-ip-10-0-101-55 -- sh -c "ETCDCTL_API=3 ETCD
 ## Migration Logs
 
 ````
-ubuntu@ip-xxx-xxx-xxx-xxx:~$ sudo kubeadm upgrade apply "v${KUBE_VERSION}"
+ubuntu@ip-10-0-101-55:~$ sudo kubeadm upgrade apply "v${KUBE_VERSION}"
 [upgrade/config] Making sure the configuration is correct:
 [upgrade/config] Reading configuration from the cluster...
 [upgrade/config] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -o yaml'

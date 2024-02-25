@@ -1,0 +1,17 @@
+# kubectl --namespace=low-usage-limit create -f low-resource-range.yaml
+# kubectl -n low-usage-limit get LimitRange
+# kubectl -n low-usage-limit delete LimitRange cpu-resource-constraint
+# kubectl -n low-usage-limit create deployment limited-hog --image vish/stress
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: low-resource-range
+spec:
+  limits:
+    - default:
+        cpu: "1"
+        memory: 500Mi
+      defaultRequest:
+        cpu: 500m
+        memory: 100Mi
+      type: Container
