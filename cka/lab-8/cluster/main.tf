@@ -300,11 +300,24 @@ sh -x /home/ubuntu/init-nfs-server.sh >> /home/ubuntu/logs/init-nfs-server.log 2
 
 sleep 120
 sh -x /home/ubuntu/init-cilium.sh >> /home/ubuntu/logs/init-cilium.log 2>&1
+sh -x /home/ubuntu/init-worker-join.sh >> /home/ubuntu/logs/init-worker-join.log 2>&1
 EOF
 
   provisioner "file" {
     source      = "./init-scripts/"
     destination = "/home/ubuntu/"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file(var.node_private_key_path)
+      host        = self.public_ip
+    }
+  }
+
+  provisioner "file" {
+    source      = var.node_private_key_path
+    destination = "/home/ubuntu/node.key"
 
     connection {
       type        = "ssh"

@@ -21,6 +21,7 @@ spec:
           imagePullPolicy: Always
           name: nginx
           volumeMounts:
+            # kubectl exec nginx-nfs-xxxx -- /bin/bash -c 'ls /opt'
             - mountPath: /opt
               name: nfs-vol
           ports:
