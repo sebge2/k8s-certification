@@ -157,8 +157,8 @@ resource "aws_security_group" "cp" {
     cidr_blocks = [
       "0.0.0.0/0"
     ]
-    from_port = 32919
-    to_port   = 32919
+    from_port = 30000
+    to_port   = 65535
     protocol  = "UDP"
     description = "NFS"
   }
@@ -167,59 +167,9 @@ resource "aws_security_group" "cp" {
     cidr_blocks = [
       "0.0.0.0/0"
     ]
-    from_port = 43927
-    to_port   = 43927
+    from_port = 30000
+    to_port   = 65535
     protocol  = "TCP"
-    description = "NFS"
-  }
-
-  ingress {
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
-    from_port = 49468
-    to_port   = 49468
-    protocol  = "UDP"
-    description = "NFS"
-  }
-
-  ingress {
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
-    from_port = 34279
-    to_port   = 34279
-    protocol  = "TCP"
-    description = "NFS"
-  }
-
-  ingress {
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
-    from_port = 40945
-    to_port   = 40945
-    protocol  = "UDP"
-    description = "NFS"
-  }
-
-  ingress {
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
-    from_port = 45465
-    to_port   = 45465
-    protocol  = "TCP"
-    description = "NFS"
-  }
-
-  ingress {
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
-    from_port = 32806
-    to_port   = 32806
-    protocol  = "UDP"
     description = "NFS"
   }
 
@@ -343,7 +293,7 @@ resource "aws_instance" "worker-node" {
 #!/bin/bash
 
 mkdir -p /home/ubuntu/logs
-sleep 60
+sleep 120
 
 sh -x /home/ubuntu/init-kube.sh >> /home/ubuntu/logs/init-kube.log 2>&1
 sh -x /home/ubuntu/init-containerd.sh >> /home/ubuntu/logs/init-containerd.log 2>&1
