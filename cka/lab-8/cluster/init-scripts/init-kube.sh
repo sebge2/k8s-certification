@@ -19,3 +19,5 @@ VERSION="1.27.11-1.1"
 sudo apt-get update
 sudo apt-get install -y kubelet=$VERSION kubeadm=$VERSION kubectl=$VERSION
 sudo apt-mark hold kubelet kubeadm kubectl
+
+echo "alias k='kubectl'" | sudo tee -a /home/ubuntu/.bashrc
