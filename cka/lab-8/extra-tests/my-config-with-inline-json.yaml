@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config-with-inline-json
+  namespace: default
+data:
+  config_first.json: |
+    {
+      "first" : "first value",
+      "second" : "second value"
+    }
+  config_second.json: |
+    {
+      "another" : "one"
+    }

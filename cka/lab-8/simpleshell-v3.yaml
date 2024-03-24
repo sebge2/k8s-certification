@@ -9,6 +9,7 @@ spec:
       volumeMounts:
         - mountPath: /etc/cars
           name: car-vol
+      # kubectl exec -ti shell-demo -- cat /etc/cars/car.model
   volumes:
     - name: car-vol
       configMap:
