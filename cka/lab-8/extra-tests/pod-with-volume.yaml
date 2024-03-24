@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-volume
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.15.1
+      volumeMounts:
+        - mountPath: /tmp/test
+          name: my-volume
+  volumes:
+    - name: my-volume
+      persistentVolumeClaim:
+        claimName: pvc-too-much

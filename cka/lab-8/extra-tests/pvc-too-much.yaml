@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-too-much
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: manual
+  resources:
+    requests:
+      storage: 200Mi
+      # PVC is immutable, but we can increase PV:
+      # kubectl patch pv pv-host -p '{"spec": {"capacity": {"storage": "1Gi"}}}'
