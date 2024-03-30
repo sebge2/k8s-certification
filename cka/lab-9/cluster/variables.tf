@@ -55,3 +55,9 @@ variable "local_domain" {
   type    = string
   default = "sfeir.local"
 }
+
+variable "numberWorkers" {
+  description = "Number of worker nodes"
+  type = number
+  default = 1
+}

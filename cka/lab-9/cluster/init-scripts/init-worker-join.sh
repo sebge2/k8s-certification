@@ -7,7 +7,7 @@ while [[ -z $(kubectl get nodes -o jsonpath="$JSONPATH" | grep "Ready=True" ) ]]
   sleep 30
 done
 
-echo "CP node ready"
+echo "CP node ready, let's provision $1 worker nodes"
 
 JOIN_COMMAND=$(sh /home/ubuntu/join-command-helper.sh)
 

@@ -211,6 +211,15 @@ resource "aws_key_pair" "node_key" {
   tags = var.tags
 }
 
+data "template_file" "cp" {
+  template = file("./init-scripts/setup-cp.sh")
+
+  vars = {
+    numberWorkerNodes = var.numberWorkers
+  }
+}
+
+
 resource "aws_instance" "cp-node" {
   ami           = var.node_image_id
   instance_type = var.node_instance_type
@@ -220,24 +229,7 @@ resource "aws_instance" "cp-node" {
   subnet_id                   = aws_subnet.public_subnet.id
   vpc_security_group_ids      = [aws_security_group.ssh.id, aws_security_group.node.id, aws_security_group.cp-node.id]
 
-  user_data = <<EOF
-#!/bin/bash
-
-mkdir -p /home/ubuntu/logs
-sleep 60
-
-sh -x /home/ubuntu/init-kube.sh >> /home/ubuntu/logs/init-kube.log 2>&1
-sh -x /home/ubuntu/init-containerd.sh >> /home/ubuntu/logs/init-containerd.log 2>&1
-sh -x /home/ubuntu/init-system.sh >> /home/ubuntu/logs/init-system.log 2>&1
-sh -x /home/ubuntu/init-cp.sh >> /home/ubuntu/logs/init-cp.log 2>&1
-sh -x /home/ubuntu/init-helm.sh >> /home/ubuntu/logs/init-helm.log 2>&1
-sh -x /home/ubuntu/init-cp-tools.sh >> /home/ubuntu/logs/init-cp-tools.log 2>&1
-sh -x /home/ubuntu/init-nfs-server.sh >> /home/ubuntu/logs/init-nfs-server.log 2>&1
-
-sleep 120
-sh -x /home/ubuntu/init-cilium.sh >> /home/ubuntu/logs/init-cilium.log 2>&1
-sh -x /home/ubuntu/init-worker-join.sh >> /home/ubuntu/logs/init-worker-join.log 2>&1
-EOF
+  user_data = data.template_file.cp.rendered
 
   provisioner "file" {
     source      = "./init-scripts/"
