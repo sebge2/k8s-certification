@@ -50,8 +50,8 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_vpc_dhcp_options" "local-domain" {
-  domain_name          = var.local_domain
-  domain_name_servers  = ["AmazonProvidedDNS"]
+  domain_name         = var.local_domain
+  domain_name_servers = ["AmazonProvidedDNS"]
 
   tags = var.tags
 }
@@ -90,75 +90,75 @@ resource "aws_security_group" "cp-node" {
   description = "Security group that allows Control plane connections"
 
   ingress {
-    from_port = 6443
-    to_port   = 6443
-    protocol  = "tcp"
+    from_port       = 6443
+    to_port         = 6443
+    protocol        = "tcp"
     security_groups = [aws_security_group.node.id]
-    description = "Kubernetes API server"
+    description     = "Kubernetes API server"
   }
 
   ingress {
-    from_port = 2379
-    to_port   = 2380
-    protocol  = "TCP"
+    from_port       = 2379
+    to_port         = 2380
+    protocol        = "TCP"
     security_groups = [aws_security_group.node.id]
-    description = "etcd server client API"
+    description     = "etcd server client API"
   }
 
   ingress {
-    from_port = 10259
-    to_port   = 10259
-    protocol  = "TCP"
+    from_port       = 10259
+    to_port         = 10259
+    protocol        = "TCP"
     security_groups = [aws_security_group.node.id]
-    description = "kube-scheduler"
+    description     = "kube-scheduler"
   }
 
   ingress {
-    from_port = 10257
-    to_port   = 10257
-    protocol  = "TCP"
+    from_port       = 10257
+    to_port         = 10257
+    protocol        = "TCP"
     security_groups = [aws_security_group.node.id]
-    description = "kube-controller manager"
+    description     = "kube-controller manager"
   }
 
   ingress {
-    from_port = 2049
-    to_port   = 2049
-    protocol  = "TCP"
+    from_port       = 2049
+    to_port         = 2049
+    protocol        = "TCP"
     security_groups = [aws_security_group.node.id]
-    description = "NFS"
+    description     = "NFS"
   }
 
   ingress {
-    from_port = 111
-    to_port   = 111
-    protocol  = "TCP"
+    from_port       = 111
+    to_port         = 111
+    protocol        = "TCP"
     security_groups = [aws_security_group.node.id]
-    description = "NFS"
+    description     = "NFS"
   }
 
   ingress {
-    from_port = 111
-    to_port   = 111
-    protocol  = "UDP"
+    from_port       = 111
+    to_port         = 111
+    protocol        = "UDP"
     security_groups = [aws_security_group.node.id]
-    description = "NFS"
+    description     = "NFS"
   }
 
   ingress {
-    from_port = 30000
-    to_port   = 65535
-    protocol  = "UDP"
+    from_port       = 30000
+    to_port         = 65535
+    protocol        = "UDP"
     security_groups = [aws_security_group.node.id]
-    description = "NFS"
+    description     = "NFS"
   }
 
   ingress {
-    from_port = 30000
-    to_port   = 65535
-    protocol  = "TCP"
+    from_port       = 30000
+    to_port         = 65535
+    protocol        = "TCP"
     security_groups = [aws_security_group.node.id]
-    description = "NFS"
+    description     = "NFS"
   }
 
   egress {
@@ -178,19 +178,19 @@ resource "aws_security_group" "worker-node" {
 
   ingress {
     security_groups = [aws_security_group.node.id]
-    from_port = 10250
-    to_port   = 10250
-    protocol  = "tcp"
-    description = "Kubelet API"
+    from_port       = 10250
+    to_port         = 10250
+    protocol        = "tcp"
+    description     = "Kubelet API"
   }
 
   ingress {
     cidr_blocks = [
       "0.0.0.0/0"
     ]
-    from_port = 30000
-    to_port   = 32767
-    protocol  = "tcp"
+    from_port   = 30000
+    to_port     = 32767
+    protocol    = "tcp"
     description = "NodePort Services"
   }
 
@@ -215,10 +215,9 @@ data "template_file" "cp" {
   template = file("./init-scripts/setup-cp.sh")
 
   vars = {
-    numberWorkerNodes = var.numberWorkers
+    numberWorkerNodes = var.number_workers
   }
 }
-
 
 resource "aws_instance" "cp-node" {
   ami           = var.node_image_id
@@ -258,14 +257,17 @@ resource "aws_instance" "cp-node" {
   tags = merge(var.tags, { Name : "${var.default_resource_name}-cp" })
 }
 
-resource "aws_instance" "worker-node" {
+resource "aws_instance" "worker-nodes" {
+  count         = var.number_workers
   ami           = var.node_image_id
   instance_type = var.node_instance_type
   key_name      = aws_key_pair.node_key.key_name
 
   associate_public_ip_address = true
   subnet_id                   = aws_subnet.public_subnet.id
-  vpc_security_group_ids      = [aws_security_group.ssh.id, aws_security_group.node.id, aws_security_group.worker-node.id]
+  vpc_security_group_ids      = [
+    aws_security_group.ssh.id, aws_security_group.node.id, aws_security_group.worker-node.id
+  ]
 
   user_data = <<EOF
 #!/bin/bash
@@ -312,10 +314,12 @@ resource "aws_route53_record" "cp-node" {
   records = [aws_instance.cp-node.private_ip]
 }
 
-resource "aws_route53_record" "worker-node" {
+resource "aws_route53_record" "worker-nodes" {
+  count = var.number_workers
+
   zone_id = aws_route53_zone.local.zone_id
-  name    = "worker.${var.local_domain}"
+  name    = "worker-${count.index}.${var.local_domain}"
   type    = "A"
   ttl     = "300"
-  records = [aws_instance.worker-node.private_ip]
+  records = [aws_instance.worker-nodes[count.index].private_ip]
 }
