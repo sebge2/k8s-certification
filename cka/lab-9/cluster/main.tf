@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_vpc" "main-vpc" {
-  cidr_block           = "10.0.0.0/16"
+  cidr_block           = "192.168.0.0/16"
   enable_dns_hostnames = true
   enable_dns_support   = true
   tags                 = var.tags
@@ -27,7 +27,7 @@ resource "aws_nat_gateway" "nat" {
 }
 
 resource "aws_subnet" "public_subnet" {
-  cidr_block        = "10.0.101.0/24"
+  cidr_block        = "192.168.1.0/24"
   vpc_id            = aws_vpc.main-vpc.id
   availability_zone = "${var.aws_region}${var.aws_main_availability_zone}"
   tags              = var.tags
