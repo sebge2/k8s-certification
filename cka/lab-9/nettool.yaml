@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu
+spec:
+  containers:
+    - name: ubuntu
+      image: ubuntu:latest
+      command:
+        - "sleep"
+      args:
+        - "infinity"
+
+# k run tools --image yenigul/dockernettools
+# telnet 10.0.0.2 53 => timeout depuis le pod mais pas le noeud
+# ping 8.8.8.8 => ok
+# telnet 10.0.0.150 53 => le pod core-dns c'est OK
+# telnet 10.0.101.9 22 => depuis le pod vers le CP c'est ok
+
+
+# On the node, I have, but not on the pod
+# 10.0.0.2        10.0.101.1      255.255.255.255 UGH   100    0        0 eth0
+
+#  On node:
+#  bash-5.1$ route -n
+#  Kernel IP routing table
+#  Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+#  0.0.0.0         10.0.1.95       0.0.0.0         UG    0      0        0 eth0
+#  10.0.1.95       0.0.0.0         255.255.255.255 UH    0      0        0 eth0
+
+
+# https://github.com/kubernetes/kubernetes/issues/15932
+# https://docs.cilium.io/en/stable/network/concepts/ipam/eni/#ipam-eni
+
+
+# kubectl run --rm utils -it --image arunvelsriram/utils bash

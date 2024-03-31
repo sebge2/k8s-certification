@@ -19,7 +19,7 @@ spec:
         - image: nginx:1.20.1
           name: nginx
           ports:
-            - containerPort: 8080
+            - containerPort: 80
               protocol: TCP
       nodeSelector:
         system: secondOne
