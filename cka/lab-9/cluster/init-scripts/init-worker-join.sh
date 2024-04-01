@@ -1,8 +1,10 @@
 #!/bin/bash
 
+bash
+
 JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]} {@.type}={@.status};{end}{end}'
 
-while [[ -z $(kubectl get nodes -o jsonpath="$JSONPATH" | grep "Ready=True" ) ]]; do
+while [ -z "$(sudo -u ubuntu kubectl get nodes -o jsonpath="$JSONPATH" | grep "Ready=True" )" ]; do
   echo "Node not ready, waiting 30s"
   sleep 30
 done

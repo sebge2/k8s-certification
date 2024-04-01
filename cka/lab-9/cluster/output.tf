@@ -3,7 +3,7 @@ output "cp_node_connection_command" {
 }
 
 output "worker_nodes_connection_command" {
-  value = [for worker in aws_instance.worker-nodes : format("ssh -o StrictHostKeyChecking=no -i ~/.aws/k8-certification/node ubuntu@%s", worker.public_ip)]
+  value = [for worker in aws_instance.worker-nodes : format("ssh -o StrictHostKeyChecking=no -i ~/.aws/k8-certification/node ubuntu@%s", worker.public_dns)]
 }
 
 output "cp_api_endpoint" {
