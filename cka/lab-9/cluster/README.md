@@ -1,4 +1,4 @@
-# CKA - Lab 2
+# CKA - Lab 9
 
 First of all, make sure that `terraform` is installed and that you have configured your aws credentials in `~/.aws/credentials`.
 
@@ -28,3 +28,8 @@ Don't forget to clear down your resources:
 terraform destroy
 ````
 
+
+## Links
+
+- [DNS Resolution](https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/)
+- [Cilium Routing](https://docs.cilium.io/en/stable/network/concepts/routing/)

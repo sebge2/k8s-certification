@@ -1,4 +1,4 @@
-# CKA - Lab 2
+# CKA - Lab 8
 
 First of all, make sure that `terraform` is installed and that you have configured your aws credentials in `~/.aws/credentials`.
 
