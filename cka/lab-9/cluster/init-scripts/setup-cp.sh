@@ -1,6 +1,7 @@
 #!/bin/bash
 
 mkdir -p /home/ubuntu/logs
+chown 0777 /home/ubuntu/logs
 sleep 60
 
 sh -x /home/ubuntu/init-kube.sh >> /home/ubuntu/logs/init-kube.log 2>&1
@@ -14,3 +15,5 @@ sh -x /home/ubuntu/init-nfs-server.sh >> /home/ubuntu/logs/init-nfs-server.log 2
 sleep 120
 sh -x /home/ubuntu/init-cilium.sh >> /home/ubuntu/logs/init-cilium.log 2>&1
 sh -x /home/ubuntu/init-worker-join.sh ${numberWorkerNodes} >> /home/ubuntu/logs/init-worker-join.log 2>&1
+
+sh -x /home/ubuntu/init-ingress-controller.sh >> /home/ubuntu/logs/init-ingress-controller.log 2>&1
