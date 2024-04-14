@@ -168,7 +168,7 @@ resource "aws_instance" "cp-node" {
 
   provisioner "file" {
     source      = "./init-scripts/"
-    destination = "/home/ubuntu/init-scripts"
+    destination = "/home/ubuntu/"
 
     connection {
       type        = "ssh"
@@ -217,7 +217,7 @@ resource "aws_instance" "worker-nodes" {
 
   provisioner "file" {
     source      = "./init-scripts/"
-    destination = "/home/ubuntu/init-scripts"
+    destination = "/home/ubuntu/"
 
     connection {
       type        = "ssh"

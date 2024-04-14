@@ -1,8 +1,12 @@
 #!/bin/bash
 
 mkdir -p /home/ubuntu/logs
+mkdir -p /home/ubuntu/init-scripts
+
 sleep 60
 
+mv /home/ubuntu/init-*.sh /home/ubuntu/init-scripts/
+mv /home/ubuntu/join-command-helper.sh /home/ubuntu/init-scripts/
 sh -x /home/ubuntu/init-scripts/init-kube.sh >> /home/ubuntu/logs/init-kube.log 2>&1
 sh -x /home/ubuntu/init-scripts/init-containerd.sh >> /home/ubuntu/logs/init-containerd.log 2>&1
 sh -x /home/ubuntu/init-scripts/init-system.sh >> /home/ubuntu/logs/init-system.log 2>&1
@@ -17,3 +21,4 @@ sh -x /home/ubuntu/init-scripts/init-worker-join.sh ${numberWorkerNodes} >> /hom
 
 sh -x /home/ubuntu/init-scripts/init-ingress-controller.sh >> /home/ubuntu/logs/init-ingress-controller.log 2>&1
 sh -x /home/ubuntu/init-scripts/init-service-mesh.sh >> /home/ubuntu/logs/init-service-mesh.log 2>&1
+sh -x /home/ubuntu/init-scripts/init-vault.sh >> /home/ubuntu/logs/init-vault.log 2>&1

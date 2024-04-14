@@ -59,5 +59,5 @@ variable "local_domain" {
 variable "number_workers" {
   description = "Number of worker nodes"
   type = number
-  default = 2
+  default = 1
 }
