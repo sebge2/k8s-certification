@@ -15,7 +15,7 @@ resource "aws_internet_gateway" "gateway" {
 }
 
 resource "aws_eip" "eip" {
-  vpc        = true
+  domain     = "vpc"
   depends_on = [aws_internet_gateway.gateway]
 }
 
@@ -67,12 +67,12 @@ resource "aws_security_group" "ssh" {
   description = "Security group that allows SSH connections"
 
   ingress {
+    from_port = 22
+    to_port   = 22
+    protocol  = "TCP"
     cidr_blocks = [
       "0.0.0.0/0"
     ]
-    from_port = 22
-    to_port   = 22
-    protocol  = "tcp"
   }
 
   tags = var.tags
@@ -90,9 +90,9 @@ resource "aws_security_group" "cp-node" {
   description = "Security group that allows Control plane connections"
 
   ingress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
     security_groups = [aws_security_group.node.id]
     description     = "Allow all inside the cluster"
   }
@@ -113,20 +113,20 @@ resource "aws_security_group" "worker-node" {
   description = "Security group that allows Worker connections"
 
   ingress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
     security_groups = [aws_security_group.node.id]
     description     = "Allow all inside the cluster"
   }
 
   ingress {
+    from_port   = 30000
+    to_port     = 32767
+    protocol    = "TCP"
     cidr_blocks = [
       "0.0.0.0/0"
     ]
-    from_port   = 30000
-    to_port     = 32767
-    protocol    = "tcp"
     description = "NodePort Services"
   }
 
@@ -140,6 +140,29 @@ resource "aws_security_group" "worker-node" {
   tags = var.tags
 }
 
+resource "aws_security_group" "vault" {
+  vpc_id      = aws_vpc.main-vpc.id
+  name        = "${var.default_resource_name}-vault"
+  description = "Security group for vault server"
+
+  ingress {
+    from_port       = 8200
+    to_port         = 8200
+    protocol        = "TCP"
+    cidr_blocks = [
+      "0.0.0.0/0"
+    ]
+    description     = "Allow vault inside cluster"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_key_pair" "node_key" {
   key_name   = var.default_resource_name
   public_key = file(var.node_public_key_path)
@@ -148,7 +171,7 @@ resource "aws_key_pair" "node_key" {
 }
 
 data "template_file" "cp" {
-  template = file("./init-scripts/setup-cp.sh")
+  template = file("./init-node-scripts/init-all-cp.sh")
 
   vars = {
     numberWorkerNodes = var.number_workers
@@ -167,7 +190,7 @@ resource "aws_instance" "cp-node" {
   user_data = data.template_file.cp.rendered
 
   provisioner "file" {
-    source      = "./init-scripts/"
+    source      = "./init-node-scripts/"
     destination = "/home/ubuntu/"
 
     connection {
@@ -194,7 +217,7 @@ resource "aws_instance" "cp-node" {
 }
 
 data "template_file" "worker" {
-  template = file("./init-scripts/setup-worker.sh")
+  template = file("./init-node-scripts/init-all-worker.sh")
 
   vars = {
     numberWorkerNodes = var.number_workers
@@ -216,7 +239,7 @@ resource "aws_instance" "worker-nodes" {
   user_data = data.template_file.worker.rendered
 
   provisioner "file" {
-    source      = "./init-scripts/"
+    source      = "./init-node-scripts/"
     destination = "/home/ubuntu/"
 
     connection {
@@ -228,6 +251,41 @@ resource "aws_instance" "worker-nodes" {
   }
 
   tags = merge(var.tags, { Name : "${var.default_resource_name}-worker" })
+}
+
+data "template_file" "vault" {
+  template = file("./init-vault-scripts/init-all.sh")
+
+  vars = {
+  }
+}
+
+resource "aws_instance" "vault" {
+  ami           = var.vault_image_id
+  instance_type = var.vault_instance_type
+  key_name      = aws_key_pair.node_key.key_name
+
+  associate_public_ip_address = true
+  subnet_id                   = aws_subnet.public_subnet.id
+  vpc_security_group_ids      = [
+    aws_security_group.ssh.id, aws_security_group.vault.id
+  ]
+
+  user_data = data.template_file.vault.rendered
+
+  provisioner "file" {
+    source      = "./init-vault-scripts/"
+    destination = "/home/ubuntu/"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file(var.node_private_key_path)
+      host        = self.public_ip
+    }
+  }
+
+  tags = merge(var.tags, { Name : "${var.default_resource_name}-vault" })
 }
 
 resource "aws_route53_zone" "local" {
@@ -256,4 +314,12 @@ resource "aws_route53_record" "worker-nodes" {
   type    = "A"
   ttl     = "300"
   records = [aws_instance.worker-nodes[count.index].private_ip]
+}
+
+resource "aws_route53_record" "vault" {
+  zone_id = aws_route53_zone.local.zone_id
+  name    = "vault.${var.local_domain}"
+  type    = "A"
+  ttl     = "300"
+  records = [aws_instance.vault.private_ip]
 }

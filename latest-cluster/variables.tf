@@ -33,7 +33,17 @@ variable "node_instance_type" {
   default     = "t2.medium"
 }
 
+variable "vault_instance_type" {
+  description = "The EC2 instance type of the vault instance"
+  default     = "t2.micro"
+}
+
 variable "node_image_id" {
+  description = "AMI of node"
+  default     = "ami-0faab6bdbac9486fb"
+}
+
+variable "vault_image_id" {
   description = "AMI of node"
   default     = "ami-0faab6bdbac9486fb"
 }

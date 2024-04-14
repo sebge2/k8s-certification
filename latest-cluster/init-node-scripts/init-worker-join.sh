@@ -11,7 +11,7 @@ done
 
 echo "CP node ready, let's provision $1 worker nodes"
 
-JOIN_COMMAND=$(sh /home/ubuntu/init-scripts/join-command-helper.sh)
+JOIN_COMMAND=$(sh /home/ubuntu/init-node-scripts/join-command-helper.sh)
 
 chmod 0700 /home/ubuntu/node.key
 
