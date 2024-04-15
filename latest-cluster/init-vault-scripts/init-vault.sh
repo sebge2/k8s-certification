@@ -16,7 +16,7 @@ sudo tee /etc/vault.d/vault.hcl <<EOF
 # Full configuration options can be found at https://developer.hashicorp.com/vault/docs/configuration
 
 ui = true
-api_addr      = "http://127.0.0.1:8200"
+api_addr  = "http://127.0.0.1:8200"
 log_level = "debug"
 
 storage "file" {

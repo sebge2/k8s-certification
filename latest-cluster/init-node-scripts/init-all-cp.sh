@@ -21,4 +21,4 @@ sh -x /home/ubuntu/init-node-scripts/init-worker-join.sh ${numberWorkerNodes} >>
 
 sh -x /home/ubuntu/init-node-scripts/init-ingress-controller.sh >> /home/ubuntu/logs/init-ingress-controller.log 2>&1
 sh -x /home/ubuntu/init-node-scripts/init-service-mesh.sh >> /home/ubuntu/logs/init-service-mesh.log 2>&1
-#sh -x /home/ubuntu/init-node-scripts/init-vault.sh >> /home/ubuntu/logs/init-vault.log 2>&1
+sh -x /home/ubuntu/init-node-scripts/init-vault.sh >> /home/ubuntu/logs/init-vault.log 2>&1
