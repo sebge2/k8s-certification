@@ -97,6 +97,14 @@ resource "aws_security_group" "cp-node" {
     description     = "Allow all inside the cluster"
   }
 
+  ingress {
+    from_port       = 6443
+    to_port         = 6443
+    protocol        = "TCP"
+    security_groups = [aws_security_group.vault.id]
+    description     = "Allow all from vault"
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
