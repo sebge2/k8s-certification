@@ -12,7 +12,7 @@ ROOT_TOKEN=$(grep "Initial Root Token: " < /home/ubuntu/vault.keys | cut -d ' ' 
 
 sudo vault login -address="$VAULT_ADDRESS" "$ROOT_TOKEN"
 
-echo "path \"kvv2/$SECRET_PATH/*\" {\n capabilities = [\"read\"]\n}"  | sudo vault policy write -address="$VAULT_ADDRESS" "$READ_POLICY_NAME"  -
+echo "path \"kvv2/data/$SECRET_PATH\" {\n capabilities = [\"read\"]\n}"  | sudo vault policy write -address="$VAULT_ADDRESS" "$READ_POLICY_NAME"  -
 
 sudo vault write -address="$VAULT_ADDRESS" "auth/$VAULT_AUTH_PATH/role/$APP_ROLE" bound_service_account_names="$SERVICE_ACCOUNT" bound_service_account_namespaces="$APP_NAMESPACE" policies="$READ_POLICY_NAME" audience=vault ttl=24h
 
