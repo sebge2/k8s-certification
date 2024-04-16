@@ -49,6 +49,3 @@ sudo vault operator unseal -address=$VAULT_ADDRESS "$UNSEAL_KEY_3"
 
 sudo vault login -address=$VAULT_ADDRESS "$ROOT_TOKEN"
 sudo vault secrets enable -address=$VAULT_ADDRESS -path=kvv2 kv-v2
-
-# Example
-sudo vault kv put -address=$VAULT_ADDRESS "kvv2/$SECRET_PATH" username="static-user" password="static-password"
