@@ -4,7 +4,7 @@
 # 1. Update the apt package index and install packages needed to use the Kubernetes apt repository:
 sudo apt-get update
 # apt-transport-https may be a dummy package; if so, you can skip that package
-sudo apt-get install -y apt-transport-https ca-certificates software-properties-common lsb-release curl gpg
+sudo apt-get install -y apt-transport-https ca-certificates software-properties-common lsb-release curl gpg jq
 
 # 2. Download the public signing key for the Kubernetes package repositories. The same signing key is used for all repositories so you can disregard the version in the URL:
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.27/deb/Release.key | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring-1.27.gpg
