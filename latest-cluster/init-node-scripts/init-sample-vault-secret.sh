@@ -8,3 +8,7 @@ SERVICE_ACCOUNT="default"
 KUBE_SECRET_NAME="my-secret"
 
 sh /home/ubuntu/init-node-scripts/create-vault-secret.sh $SECRET_PATH $READ_POLICY_NAME $APP_ROLE $APP_NAMESPACE $SERVICE_ACCOUNT $KUBE_SECRET_NAME
+
+# Debug
+# kubectl describe vaultstaticsecrets -n my-app vault-static-secret
+# kubectl describe vaultauths -n my-app vault-static-auth
