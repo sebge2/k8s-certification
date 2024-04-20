@@ -258,6 +258,11 @@ resource "aws_instance" "worker-nodes" {
     }
   }
 
+  ebs_block_device {
+    device_name = "/dev/sda1"
+    volume_size = 16
+  }
+
   tags = merge(var.tags, { Name : "${var.default_resource_name}-worker" })
 }
 
