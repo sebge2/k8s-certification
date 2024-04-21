@@ -23,5 +23,5 @@ sh -x /home/ubuntu/init-node-scripts/init-ingress-controller.sh >> /home/ubuntu/
 #sh -x /home/ubuntu/init-node-scripts/init-service-mesh.sh >> /home/ubuntu/logs/init-service-mesh.log 2>&1
 sh -x /home/ubuntu/init-node-scripts/init-vault.sh >> /home/ubuntu/logs/init-vault.log 2>&1
 sh -x /home/ubuntu/init-node-scripts/init-sample-vault-secret.sh>> /home/ubuntu/logs/init-sample-vault-secret.log 2>&1
-#sh -x /home/ubuntu/init-node-scripts/init-logging.sh >> /home/ubuntu/logs/init-logging.log 2>&1
+sh -x /home/ubuntu/init-node-scripts/init-logging.sh >> /home/ubuntu/logs/init-logging.log 2>&1
 #sh -x /home/ubuntu/init-node-scripts/init-dashboard.sh >> /home/ubuntu/logs/init-dashboard.log 2>&1
