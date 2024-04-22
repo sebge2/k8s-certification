@@ -13,18 +13,28 @@ service:
 replicas: 1
 persistence:
   enabled: false
-protocol: http
+protocol: https
 extraEnvs:
-  - name: 'xpack.security.enabled'
-    value: 'false'
+  - name: 'xpack.security.http.ssl.enabled'
+    value: 'true'
 EOF
 
 ELASTIC_TOKEN=$(kubectl get secrets --namespace=logging elasticsearch-master-credentials -ojsonpath='{.data.password}' --kubeconfig /home/ubuntu/.kube/config | base64 -d)
-echo "Elastic Token:"
+echo "Elastic Password for 'elastic' user:"
 echo "$ELASTIC_TOKEN"
 
 
-#helm install kibana elastic/kibana --namespace=$NAMESPACE --kubeconfig "/home/ubuntu/.kube/config" --set "service.nodePort=31502" --set "service.type=NodePort"
+helm install kibana elastic/kibana --namespace=$NAMESPACE --kubeconfig "/home/ubuntu/.kube/config" -f -<<EOF
+service:
+  nodePort: 31502
+  type: NodePort
+EOF
+
+USER_PWD=$(kubectl get secrets --namespace=logging elasticsearch-master-credentials -ojsonpath='{.data.password}' --kubeconfig /home/ubuntu/.kube/config | base64 -d)
+echo "Kibana Password for 'elastic' user:"
+echo "$USER_PWD"
+
+
 #helm install fluentd stable/fluentd-elasticsearch --namespace=$NAMESPACE --kubeconfig "/home/ubuntu/.kube/config"
 
 # Kibana:
