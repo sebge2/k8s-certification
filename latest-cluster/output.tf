@@ -14,6 +14,10 @@ output "vault_web" {
   value = "http://${aws_instance.vault.public_dns}:8200"
 }
 
+output "elastic_search" {
+  value = "http://${aws_instance.worker-nodes[0].public_dns}:31502"
+}
+
 output "cp_api_endpoint" {
   value = "${aws_instance.cp-node.public_dns}:6443"
 }
