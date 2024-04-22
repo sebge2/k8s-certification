@@ -49,6 +49,9 @@ config:
         Logstash_Format Off
         Retry_Limit False
         Suppress_Type_Name On
+        Write_Operation upsert
+        Generate_ID true
+        Replace_Dots true
         Trace_Error On
         HTTP_User elastic
         HTTP_Passwd $ELASTIC_TOKEN
@@ -63,6 +66,9 @@ config:
         Logstash_Prefix node
         Retry_Limit False
         Suppress_Type_Name On
+        Write_Operation upsert
+        Generate_ID true
+        Replace_Dots true
         Trace_Error On
         HTTP_User elastic
         HTTP_Passwd $ELASTIC_TOKEN
