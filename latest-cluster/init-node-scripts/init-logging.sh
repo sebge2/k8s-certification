@@ -5,7 +5,9 @@ NAMESPACE="kube-logging"
 kubectl create ns $NAMESPACE --kubeconfig /home/ubuntu/.kube/config
 
 helm repo add elastic https://helm.elastic.co
+helm repo add fluent https://fluent.github.io/helm-charts
 helm repo update
+
 
 # https://artifacthub.io/packages/helm/elastic/elasticsearch?modal=values
 helm install elasticsearch elastic/elasticsearch --namespace=$NAMESPACE --kubeconfig "/home/ubuntu/.kube/config"  -f -<<EOF
@@ -37,8 +39,8 @@ echo "Kibana Password for 'elastic' user:"
 echo "$USER_PWD"
 
 
-helm repo add fluent https://fluent.github.io/helm-charts
 # https://github.com/fluent/helm-charts/blob/main/charts/fluent-bit/values.yaml
+# https://www.digitalocean.com/community/tutorials/how-to-set-up-an-elasticsearch-fluentd-and-kibana-efk-logging-stack-on-kubernetes
 helm install fluentd fluent/fluent-bit --namespace=$NAMESPACE --kubeconfig "/home/ubuntu/.kube/config" -f -<<EOF
 config:
   outputs: |
@@ -79,5 +81,3 @@ EOF
 # Debug with:
 # kubectl run tmp-shell --rm -i --tty --image nicolaka/netshoot -n kube-logging -- bash
 # curl -v https://elasticsearch-master:9200
-
-# https://www.digitalocean.com/community/tutorials/how-to-set-up-an-elasticsearch-fluentd-and-kibana-efk-logging-stack-on-kubernetes
