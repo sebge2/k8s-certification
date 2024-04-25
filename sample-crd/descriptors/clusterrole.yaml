@@ -11,6 +11,7 @@ rules:
   - list
   - watch
   - get
+  - update
 - apiGroups: [""]
   resources:
     - endpoints

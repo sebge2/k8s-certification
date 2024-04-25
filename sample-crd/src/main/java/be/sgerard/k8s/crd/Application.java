@@ -72,7 +72,7 @@ public class Application {
                 .build();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("Application shutting down");
+            log.info("Application shutting down");
             manager.shutdown();
             stopRunning = true;
         }));
@@ -83,14 +83,14 @@ public class Application {
 
     private static Runnable getStartFunction(ControllerManager controllerManager) {
         return () -> {
-            System.out.println("I'm the leader now and start processing events");
+            log.info("I'm the leader now and start processing events");
             controllerManager.run();
         };
     }
 
     private static Runnable getStopFunction(ControllerManager controllerManager) {
         return () -> {
-            System.out.println("i lost the leadership and stop processing now");
+            log.info("i lost the leadership and stop processing now");
             controllerManager.shutdown();
         };
     }
