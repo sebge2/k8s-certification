@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: sample-crd
+  name: sample-crd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sample-crd
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: sample-crd
+    spec:
+      containers:
+      - image: docker.io/sebge2/sample-crd:1.0.0-SNAPSHOT
+        name: sample-crd
+        imagePullPolicy: Always
+      serviceAccountName: sample-crd

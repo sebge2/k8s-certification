@@ -1,0 +1,8 @@
+apiVersion: sgerard.be/v1
+kind: Backup
+metadata:
+  name: test
+spec:
+  namespaces:
+    - test1
+    - test2
