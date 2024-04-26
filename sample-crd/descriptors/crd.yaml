@@ -1,14 +1,14 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: backups.sgerard.be
+  name: annotations.sgerard.be
 spec:
   group: sgerard.be
   scope: Cluster
   names:
-    kind: Backup
-    singular: backup
-    plural: backups
+    kind: Annotation
+    singular: annotation
+    plural: annotations
   versions:
     - name: v1
       served: true

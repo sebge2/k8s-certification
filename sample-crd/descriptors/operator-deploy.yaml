@@ -2,21 +2,21 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: sample-crd
-  name: sample-crd
+    app: annotation-operator
+  name: annotation-operator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sample-crd
+      app: annotation-operator
   strategy: {}
   template:
     metadata:
       labels:
-        app: sample-crd
+        app: annotation-operator
     spec:
       containers:
       - image: docker.io/sebge2/sample-crd:1.0.0-SNAPSHOT
-        name: sample-crd
+        name: annotation-operator
         imagePullPolicy: Always
-      serviceAccountName: sample-crd
+      serviceAccountName: annotation-operator

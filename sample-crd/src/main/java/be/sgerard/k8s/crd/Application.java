@@ -44,7 +44,7 @@ public class Application {
 
         final SharedInformerFactory sharedInformerFactory = new SharedInformerFactory(apiClient);
 
-        final GenericKubernetesApi<Annotation, AnnotationList> api = new GenericKubernetesApi<>(Annotation.class, AnnotationList.class, "sgerard.be", "v1", "backups", apiClient);
+        final GenericKubernetesApi<Annotation, AnnotationList> api = new GenericKubernetesApi<>(Annotation.class, AnnotationList.class, "sgerard.be", "v1", "annotations", apiClient);
 
         final SharedIndexInformer<Annotation> sharedIndexInformer = sharedInformerFactory.sharedIndexInformerFor(api, Annotation.class, 0);
         Controller apiServiceController = ControllerBuilder.defaultBuilder(sharedInformerFactory)

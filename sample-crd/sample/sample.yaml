@@ -1,5 +1,5 @@
 apiVersion: sgerard.be/v1
-kind: Backup
+kind: Annotation
 metadata:
   name: test
 spec:

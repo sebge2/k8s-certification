@@ -32,12 +32,12 @@ public class ApiServiceReconciler implements Reconciler {
 
         Optional
                 .ofNullable(sharedInformer.getIndexer().getByKey(key))
-                .ifPresent(this::handleNewBackup);
+                .ifPresent(this::handleNewAnnotation);
 
         return new Result(false);
     }
 
-    private void handleNewBackup(Annotation annotation) {
+    private void handleNewAnnotation(Annotation annotation) {
         log.info("Created/Updated resource: %s/%s".formatted(annotation.getMetadata().getNamespace(), annotation.getMetadata().getName()));
 
         log.info(annotation.toString());
@@ -70,8 +70,6 @@ public class ApiServiceReconciler implements Reconciler {
     private void addFinalizer(Annotation annotation) {
         final V1Patch patch = createPatch(true);
 
-        log.info(patch.getValue());
-
         final KubernetesApiResponse<Annotation> response = patch(annotation, patch);
 
         if (!response.isSuccess()) {
@@ -83,8 +81,6 @@ public class ApiServiceReconciler implements Reconciler {
 
     private void removeFinalizer(Annotation annotation) {
         final V1Patch patch = createPatch(false);
-
-        log.info(patch.getValue());
 
         final KubernetesApiResponse<Annotation> response = patch(annotation, patch);
 
