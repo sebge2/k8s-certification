@@ -1,11 +1,12 @@
 package be.sgerard.k8s.crd;
 
-import be.sgerard.k8s.crd.model.resource.Backup;
-import be.sgerard.k8s.crd.model.resource.BackupList;
+import be.sgerard.k8s.crd.model.resource.Annotation;
+import be.sgerard.k8s.crd.model.resource.AnnotationList;
 import io.kubernetes.client.informer.SharedIndexInformer;
 import io.kubernetes.client.informer.SharedInformerFactory;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.Configuration;
+import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.util.ClientBuilder;
 import io.kubernetes.client.util.generic.GenericKubernetesApi;
 
@@ -43,16 +44,16 @@ public class Application {
 
         final SharedInformerFactory sharedInformerFactory = new SharedInformerFactory(apiClient);
 
-        final GenericKubernetesApi<Backup, BackupList> api = new GenericKubernetesApi<>(Backup.class, BackupList.class, "sgerard.be", "v1", "backups", apiClient);
+        final GenericKubernetesApi<Annotation, AnnotationList> api = new GenericKubernetesApi<>(Annotation.class, AnnotationList.class, "sgerard.be", "v1", "backups", apiClient);
 
-        final SharedIndexInformer<Backup> sharedIndexInformer = sharedInformerFactory.sharedIndexInformerFor(api, Backup.class, 0);
+        final SharedIndexInformer<Annotation> sharedIndexInformer = sharedInformerFactory.sharedIndexInformerFor(api, Annotation.class, 0);
         Controller apiServiceController = ControllerBuilder.defaultBuilder(sharedInformerFactory)
-                .withReconciler(new ApiServiceReconciler(sharedIndexInformer, api)) // required, set the actual reconciler
+                .withReconciler(new ApiServiceReconciler(sharedIndexInformer, new AppsV1Api(apiClient), api)) // required, set the actual reconciler
                 .withName("Api service controller") // optional, set name for controller
                 .withWorkerCount(10) // optional, set worker thread count
                 .withReadyFunc(sharedIndexInformer::hasSynced) // optional, only starts controller when the cache has synced up
                 .withReadyTimeout(Duration.ofSeconds(1200))// optional, if controller cannot sync before this time out application will exit
-                .watch(workQueue -> ControllerBuilder.controllerWatchBuilder(Backup.class, workQueue).build())
+                .watch(workQueue -> ControllerBuilder.controllerWatchBuilder(Annotation.class, workQueue).build())
                 .build();
 
         String lockHolderIdentityName = UUID.randomUUID().toString(); // Anything unique

@@ -12,6 +12,7 @@ rules:
   - watch
   - get
   - update
+  - patch
 - apiGroups: [""]
   resources:
     - endpoints
@@ -21,3 +22,5 @@ rules:
     - get
     - create
     - update
+
+# kubectl auth can-i --as=system:serviceaccount:default:sample-crd --list

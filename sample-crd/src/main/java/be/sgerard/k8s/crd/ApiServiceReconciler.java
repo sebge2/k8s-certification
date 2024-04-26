@@ -1,12 +1,13 @@
 package be.sgerard.k8s.crd;
 
-import be.sgerard.k8s.crd.model.resource.Backup;
-import be.sgerard.k8s.crd.model.resource.BackupList;
+import be.sgerard.k8s.crd.model.resource.Annotation;
+import be.sgerard.k8s.crd.model.resource.AnnotationList;
 import io.kubernetes.client.custom.V1Patch;
 import io.kubernetes.client.extended.controller.reconciler.Reconciler;
 import io.kubernetes.client.extended.controller.reconciler.Request;
 import io.kubernetes.client.extended.controller.reconciler.Result;
 import io.kubernetes.client.informer.SharedIndexInformer;
+import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.util.generic.GenericKubernetesApi;
 import io.kubernetes.client.util.generic.KubernetesApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +19,12 @@ import java.util.Optional;
 @Slf4j
 public class ApiServiceReconciler implements Reconciler {
 
-    public static final String FINALIZER = "backups.sgerard.be";
+    public static final String FINALIZER = "annotations.sgerard.be";
     public static final String PATCH_TYPE = "application/json-patch+json";
 
-    private final SharedIndexInformer<Backup> sharedInformer;
-    private final GenericKubernetesApi<Backup, BackupList> api;
+    private final SharedIndexInformer<Annotation> sharedInformer;
+    private final AppsV1Api appsV1Api;
+    private final GenericKubernetesApi<Annotation, AnnotationList> api;
 
     @Override
     public Result reconcile(Request request) {
@@ -35,57 +37,75 @@ public class ApiServiceReconciler implements Reconciler {
         return new Result(false);
     }
 
-    private void handleNewBackup(Backup backup) {
-        log.info("Created/Updated resource: %s/%s".formatted(backup.getMetadata().getNamespace(), backup.getMetadata().getName()));
+    private void handleNewBackup(Annotation annotation) {
+        log.info("Created/Updated resource: %s/%s".formatted(annotation.getMetadata().getNamespace(), annotation.getMetadata().getName()));
 
-        if (isDeleted(backup)) {
-            removeFinalizer(backup);
-        } else if (!isFinalizerPresent(backup)) {
-            addFinalizer(backup);
+        log.info(annotation.toString());
+
+        if (isDeleted(annotation)) {
+//            api.listNamespacedDeployment().execute().getItems()
+
+            // TODO do something
+            removeFinalizer(annotation);
+        } else if (!isFinalizerPresent(annotation)) {
+            // TODO annotate
+            addFinalizer(annotation);
         } else {
-            // TODO
+            // TODO do something
+
+            log.debug("Update "  + annotation);
         }
     }
 
-    private boolean isDeleted(Backup backup) {
-        return backup.getMetadata().getDeletionTimestamp() != null;
+    private boolean isDeleted(Annotation annotation) {
+        return annotation.getMetadata().getDeletionTimestamp() != null;
     }
 
-    private boolean isFinalizerPresent(Backup backup) {
-        return Optional.ofNullable(backup.getMetadata().getFinalizers())
+    private boolean isFinalizerPresent(Annotation annotation) {
+        return Optional.ofNullable(annotation.getMetadata().getFinalizers())
                 .map(finalizers -> finalizers.contains(FINALIZER))
                 .orElse(false);
     }
 
-    private void addFinalizer(Backup backup) {
-        final V1Patch patch = new V1Patch("[{\"op\": \"replace\", \"path\": \"/metadata/finalizers\", \"value\":[\"backups.sgerard.be\"]}]");
+    private void addFinalizer(Annotation annotation) {
+        final V1Patch patch = createPatch(true);
 
-        final KubernetesApiResponse<Backup> response = patch(backup, patch);
+        log.info(patch.getValue());
+
+        final KubernetesApiResponse<Annotation> response = patch(annotation, patch);
 
         if (!response.isSuccess()) {
-            log.error("Error while adding finalizer to %s/%s. Status %s.".formatted(backup.getMetadata().getNamespace(), backup.getMetadata().getName(), response.getStatus()));
+            log.error("Error while adding finalizer to %s/%s. Status %s.".formatted(annotation.getMetadata().getNamespace(), annotation.getMetadata().getName(), response.getStatus()));
         } else {
-            log.debug("The finalizer has been added to %s/%s.".formatted(backup.getMetadata().getNamespace(), backup.getMetadata().getName()));
+            log.debug("The finalizer has been added to %s/%s.".formatted(annotation.getMetadata().getNamespace(), annotation.getMetadata().getName()));
         }
     }
 
-    private void removeFinalizer(Backup backup) {
-        final V1Patch patch = new V1Patch("[{\"op\": \"remove\", \"path\": \"/metadata/finalizers\", \"value\":[\"backups.sgerard.be\"]}]");
+    private void removeFinalizer(Annotation annotation) {
+        final V1Patch patch = createPatch(false);
 
-        final KubernetesApiResponse<Backup> response = patch(backup, patch);
+        log.info(patch.getValue());
+
+        final KubernetesApiResponse<Annotation> response = patch(annotation, patch);
 
         if (!response.isSuccess()) {
-            log.error("Error while removing finalizer to %s/%s.".formatted(backup.getMetadata().getNamespace(), backup.getMetadata().getName()));
+            log.error("Error while removing finalizer to %s/%s.".formatted(annotation.getMetadata().getNamespace(), annotation.getMetadata().getName()));
         } else {
-            log.debug("The finalizer has been removed from: %s/%s. Status %s.".formatted(backup.getMetadata().getNamespace(), backup.getMetadata().getName(), response.getStatus()));
+            log.debug("The finalizer has been removed from: %s/%s. Status %s.".formatted(annotation.getMetadata().getNamespace(), annotation.getMetadata().getName(), response.getStatus()));
         }
     }
 
-    private KubernetesApiResponse<Backup> patch(Backup backup, V1Patch patch) {
-        if (backup.getMetadata().getNamespace() != null) {
-            return api.patch(backup.getMetadata().getNamespace(), backup.getMetadata().getName(), PATCH_TYPE, patch);
+    private KubernetesApiResponse<Annotation> patch(Annotation annotation, V1Patch patch) {
+        if (annotation.getMetadata().getNamespace() != null) {
+            return api.patch(annotation.getMetadata().getNamespace(), annotation.getMetadata().getName(), PATCH_TYPE, patch);
         } else {
-            return api.patch(backup.getMetadata().getName(), PATCH_TYPE, patch);
+            return api.patch(annotation.getMetadata().getName(), PATCH_TYPE, patch);
         }
+    }
+
+    private V1Patch createPatch(boolean add) {
+        final String operator = add ? "replace" : "remove";
+
+        return new V1Patch("[{\"op\": \"%s\", \"path\": \"/metadata/finalizers\", \"value\":[\"%s\"]}]".formatted(operator, FINALIZER));
     }
 }

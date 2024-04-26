@@ -9,11 +9,11 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Backup implements KubernetesObject {
+public class Annotation implements KubernetesObject {
 
     private String apiVersion;
     private String kind;
     private V1ObjectMeta metadata;
-    private BackupSpec spec;
+    private AnnotationSpec spec;
 
 }

@@ -10,10 +10,10 @@ import java.util.List;
 
 @Getter
 @Setter
-public class BackupList implements KubernetesListObject {
+public class AnnotationList implements KubernetesListObject {
 
     private String apiVersion;
-    private List<Backup> items = new ArrayList<>();
+    private List<Annotation> items = new ArrayList<>();
     private String kind;
     private V1ListMeta metadata;
 
