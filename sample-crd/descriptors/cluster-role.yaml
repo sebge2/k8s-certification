@@ -3,24 +3,16 @@ kind: ClusterRole
 metadata:
   name: annotation-operator
 rules:
-- apiGroups:
-  - sgerard.be
-  resources:
-  - annotations
-  verbs:
-  - list
-  - watch
-  - get
-  - update
-  - patch
-- apiGroups: [""]
-  resources:
-    - endpoints
-  verbs:
-    - list
-    - watch
-    - get
-    - create
-    - update
+  - apiGroups:
+      - sgerard.be
+    resources:
+      - annotations
+    verbs: [ "list","get", "watch", "create","update","patch","delete" ]
+  - apiGroups: [ "" ]
+    resources: [ "endpoints" ]
+    verbs: [ "list","get", "watch", "create","update","patch","delete" ]
+  - apiGroups: [ "", "extensions","apps" ]
+    resources: [ "deployments", "replicasets", "pods" ]
+    verbs: [ "list","get", "watch", "create","update","patch","delete" ]
 
-# kubectl auth can-i --as=system:serviceaccount:default:annotation-operator --list
+# kubectl auth can-i --as=system:serviceaccount:annotation-operator:annotation-operator --list

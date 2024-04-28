@@ -7,13 +7,21 @@ import io.kubernetes.client.extended.controller.reconciler.Reconciler;
 import io.kubernetes.client.extended.controller.reconciler.Request;
 import io.kubernetes.client.extended.controller.reconciler.Result;
 import io.kubernetes.client.informer.SharedIndexInformer;
+import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
+import io.kubernetes.client.openapi.models.V1Deployment;
+import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.util.generic.GenericKubernetesApi;
 import io.kubernetes.client.util.generic.KubernetesApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import static java.util.Collections.emptyList;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -43,18 +51,21 @@ public class ApiServiceReconciler implements Reconciler {
         log.info(annotation.toString());
 
         if (isDeleted(annotation)) {
-//            api.listNamespacedDeployment().execute().getItems()
-
-            // TODO do something
+            // TODO do something, remove labels?
             removeFinalizer(annotation);
         } else if (!isFinalizerPresent(annotation)) {
-            // TODO annotate
+            annotateDeployments(annotation);
             addFinalizer(annotation);
         } else {
-            // TODO do something
-
-            log.debug("Update "  + annotation);
+            annotateDeployments(annotation);
         }
+    }
+
+    private void annotateDeployments(Annotation annotation) {
+        final String namespace = Optional.ofNullable(annotation.getMetadata().getNamespace()).orElse("default");
+
+        listDeployments(namespace)
+                .forEach(item -> updateDeployment(item, namespace, annotation));
     }
 
     private boolean isDeleted(Annotation annotation) {
@@ -103,5 +114,40 @@ public class ApiServiceReconciler implements Reconciler {
         final String operator = add ? "replace" : "remove";
 
         return new V1Patch("[{\"op\": \"%s\", \"path\": \"/metadata/finalizers\", \"value\":[\"%s\"]}]".formatted(operator, FINALIZER));
+    }
+
+    private List<V1Deployment> listDeployments(String namespace) {
+        try {
+            return appsV1Api.listNamespacedDeployment(namespace)
+                    .execute()
+                    .getItems();
+        } catch (ApiException e) {
+            log.error("Error while listing deployments in namespace %s.".formatted(namespace), e);
+
+            return emptyList();
+        }
+    }
+
+    private void updateDeployment(V1Deployment deployment, String namespace, Annotation annotation) {
+        final Map<String, String> deploymentAnnotations = Optional.ofNullable(deployment.getMetadata())
+                .map(V1ObjectMeta::getAnnotations)
+                .orElseGet(HashMap::new);
+
+        deploymentAnnotations.putAll(annotation.getSpec().getAnnotations());
+
+        log.info("Update deployment %s/%s, annotations %s.".formatted(namespace, deployment.getMetadata().getName(), deploymentAnnotations));
+
+        deployment.getMetadata().setAnnotations(deploymentAnnotations);
+
+        updateDeployment(deployment, namespace);
+    }
+
+    private void updateDeployment(V1Deployment item, String namespace) {
+        try {
+            appsV1Api.replaceNamespacedDeployment(item.getMetadata().getName(), namespace, item)
+                    .execute();
+        } catch (ApiException e) {
+            log.error("Error while updating deployment %s/%s.".formatted(namespace, item.getMetadata().getName()), e);
+        }
     }
 }

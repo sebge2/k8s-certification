@@ -57,7 +57,7 @@ public class Application {
                 .build();
 
         String lockHolderIdentityName = UUID.randomUUID().toString(); // Anything unique
-        EndpointsLock lock = new EndpointsLock("default", "apiservice-ex", lockHolderIdentityName);
+        EndpointsLock lock = new EndpointsLock("default", "leader-election-annotation-operator", lockHolderIdentityName);
 
         LeaderElectionConfig leaderElectionConfig = new LeaderElectionConfig(lock, Duration.ofMillis(10000), Duration.ofMillis(8000), Duration.ofMillis(2000));
 
