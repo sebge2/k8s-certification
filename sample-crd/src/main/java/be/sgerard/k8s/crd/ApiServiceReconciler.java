@@ -54,8 +54,8 @@ public class ApiServiceReconciler implements Reconciler {
             // TODO do something, remove labels?
             removeFinalizer(annotation);
         } else if (!isFinalizerPresent(annotation)) {
-            annotateDeployments(annotation);
             addFinalizer(annotation);
+            annotateDeployments(annotation);
         } else {
             annotateDeployments(annotation);
         }
