@@ -1,5 +1,8 @@
-# kubectl taint nodes node1 bubba=myValue:NoExecute
-# kubectl taint nodes node2 bubba=myValueX:NoExecute
+# kubectl taint nodes worker-0 bubba=myValue:NoExecute
+# Create deployment.
+# Wait that they are provisioned and run command:
+# kubectl taint nodes worker-1 bubba=myValueX:NoExecute
+# All pods will be on worker-0.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
