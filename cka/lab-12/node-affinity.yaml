@@ -23,4 +23,4 @@ spec:
                 - key: kubernetes.io/hostname
                   operator: In
                   values:
-                  - ip-192-168-1-215
+                  - worker-0
