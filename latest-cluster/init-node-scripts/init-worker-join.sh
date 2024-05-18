@@ -11,13 +11,13 @@ done
 
 echo "CP node ready, let's provision $1 worker nodes"
 
-JOIN_COMMAND=$(sh /home/ubuntu/init-node-scripts/join-command-helper.sh)
-
 chmod 0700 /home/ubuntu/node.key
 
 START=0
 END=$(($1-1))
 for i in $(seq $START $END)
 do
+  JOIN_COMMAND=$(sh /home/ubuntu/init-node-scripts/join-command-helper.sh "$i")
+
   ssh -o StrictHostKeyChecking=no -i /home/ubuntu/node.key "ubuntu@worker-${i}.sfeir.local" "${JOIN_COMMAND}"
 done
