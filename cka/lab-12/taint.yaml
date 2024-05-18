@@ -1,0 +1,26 @@
+# kubectl taint nodes node1 bubba=myValue:PreferNoSchedule
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taint-deployment
+spec:
+  replicas: 8
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name:  nginx
+          image: nginx:1.20.1
+          ports:
+            - containerPort: 80
+      tolerations:
+        - key: "bubba"
+          operator: "Equal"
+          value: "myValue"
+          effect: "NoExecute"
+          tolerationSeconds: 20
