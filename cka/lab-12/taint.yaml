@@ -1,4 +1,5 @@
-# kubectl taint nodes node1 bubba=myValue:PreferNoSchedule
+# kubectl taint nodes node1 bubba=myValue:NoExecute
+# kubectl taint nodes node2 bubba=myValueX:NoExecute
 apiVersion: apps/v1
 kind: Deployment
 metadata:
