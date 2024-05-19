@@ -12,7 +12,7 @@ EOF
 
 
 # Start Control Plane
-sudo kubeadm init --config=/home/ubuntu/kubeadm-config.yaml --upload-certs | sudo tee /home/ubuntu/kubeadm-init.out
+sudo kubeadm init --config=/home/ubuntu/kubeadm-config.yaml --node-name=cp-0 --upload-certs | sudo tee /home/ubuntu/kubeadm-init.out
 
 
 # Setup Kube Config
