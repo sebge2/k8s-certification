@@ -38,7 +38,17 @@ variable "vault_instance_type" {
   default     = "t2.micro"
 }
 
+variable "cp_proxy_instance_type" {
+  description = "The EC2 instance type of the control plane proxy instance"
+  default     = "t2.micro"
+}
+
 variable "node_image_id" {
+  description = "AMI of node"
+  default     = "ami-0faab6bdbac9486fb"
+}
+
+variable "cp_proxy_image_id" {
   description = "AMI of node"
   default     = "ami-0faab6bdbac9486fb"
 }
@@ -70,4 +80,10 @@ variable "number_workers" {
   description = "Number of worker nodes"
   type = number
   default = 2
+}
+
+variable "number_additional_cp" {
+  description = "Number of additional control plane nodes"
+  type = number
+  default = 1
 }

@@ -1,5 +1,13 @@
-output "cp_node_connection_command" {
-  value = "ssh -o StrictHostKeyChecking=no -i ~/.aws/k8-certification/node ubuntu@${aws_instance.cp-node.public_dns}"
+output "main_cp_node_connection_command" {
+  value = "ssh -o StrictHostKeyChecking=no -i ~/.aws/k8-certification/node ubuntu@${aws_instance.main_cp-node.public_dns}"
+}
+
+#output "cp_node_connection_command" {
+#  value = [for cp in aws_instance.cp-nodes : format("ssh -o StrictHostKeyChecking=no -i ~/.aws/k8-certification/node ubuntu@%s", cp.public_dns)]
+#}
+
+output "cp_proxy_connection_command" {
+  value = "ssh -o StrictHostKeyChecking=no -i ~/.aws/k8-certification/node ubuntu@${aws_instance.cp_proxy.public_dns}"
 }
 
 output "worker_nodes_connection_command" {
@@ -27,5 +35,5 @@ output "prometheus_dashboard" {
 }
 
 output "cp_api_endpoint" {
-  value = "${aws_instance.cp-node.public_dns}:6443"
+  value = "${aws_instance.main_cp-node.public_dns}:6443"
 }

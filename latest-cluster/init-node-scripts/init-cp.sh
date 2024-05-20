@@ -17,5 +17,6 @@ sudo kubeadm init --config=/home/ubuntu/kubeadm-config.yaml --node-name=cp-0 --u
 
 # Setup Kube Config
 mkdir -p /home/ubuntu/.kube
+chmod 0700 /home/ubuntu/node.key
 cp -i /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
 sudo chown ubuntu:ubuntu /home/ubuntu/.kube/config

@@ -101,7 +101,7 @@ resource "aws_security_group" "cp-node" {
     from_port       = 6443
     to_port         = 6443
     protocol        = "TCP"
-    security_groups = [aws_security_group.vault.id]
+    security_groups = [aws_security_group.vault.id, aws_security_group.cp-proxy.id]
     description     = "Allow all from vault"
   }
 
@@ -148,6 +148,31 @@ resource "aws_security_group" "worker-node" {
   tags = var.tags
 }
 
+resource "aws_security_group" "cp-proxy" {
+  vpc_id      = aws_vpc.main-vpc.id
+  name        = "${var.default_resource_name}-cp-proxy"
+  description = "Security group that allows connections to Control Plane proxy"
+
+  ingress {
+    from_port   = 9999
+    to_port     = 9999
+    protocol    = "TCP"
+    cidr_blocks = [
+      "0.0.0.0/0"
+    ]
+    description = "Stats"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = var.tags
+}
+
 resource "aws_security_group" "vault" {
   vpc_id      = aws_vpc.main-vpc.id
   name        = "${var.default_resource_name}-vault"
@@ -178,15 +203,16 @@ resource "aws_key_pair" "node_key" {
   tags = var.tags
 }
 
-data "template_file" "cp" {
-  template = file("./init-node-scripts/init-all-cp.sh")
+data "template_file" "main_cp" {
+  template = file("./init-node-scripts/init-all-main-cp.sh")
 
   vars = {
+    numberCpNodes = sum([var.number_additional_cp, 1]),
     numberWorkerNodes = var.number_workers
   }
 }
 
-resource "aws_instance" "cp-node" {
+resource "aws_instance" "main_cp-node" {
   ami           = var.node_image_id
   instance_type = var.node_instance_type
   key_name      = aws_key_pair.node_key.key_name
@@ -195,7 +221,7 @@ resource "aws_instance" "cp-node" {
   subnet_id                   = aws_subnet.public_subnet.id
   vpc_security_group_ids      = [aws_security_group.ssh.id, aws_security_group.node.id, aws_security_group.cp-node.id]
 
-  user_data = data.template_file.cp.rendered
+  user_data = data.template_file.main_cp.rendered
 
   provisioner "file" {
     source      = "./init-node-scripts/"
@@ -266,6 +292,42 @@ resource "aws_instance" "worker-nodes" {
   tags = merge(var.tags, { Name : "${var.default_resource_name}-worker" })
 }
 
+data "template_file" "cp_proxy" {
+  template = file("./init-cp-proxy-scripts/init-all.sh")
+
+  vars = {
+    numberCpNodes = sum([var.number_additional_cp, 1]),
+  }
+}
+
+resource "aws_instance" "cp_proxy" {
+  ami           = var.cp_proxy_image_id
+  instance_type = var.cp_proxy_instance_type
+  key_name      = aws_key_pair.node_key.key_name
+
+  associate_public_ip_address = true
+  subnet_id                   = aws_subnet.public_subnet.id
+  vpc_security_group_ids      = [
+    aws_security_group.ssh.id, aws_security_group.cp-proxy.id
+  ]
+
+  user_data = data.template_file.cp_proxy.rendered
+
+  provisioner "file" {
+    source      = "./init-cp-proxy-scripts/"
+    destination = "/home/ubuntu/"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file(var.node_private_key_path)
+      host        = self.public_ip
+    }
+  }
+
+  tags = merge(var.tags, { Name : "${var.default_resource_name}-cp-proxy" })
+}
+
 data "template_file" "vault" {
   template = file("./init-vault-scripts/init-all.sh")
 
@@ -311,13 +373,31 @@ resource "aws_route53_zone" "local" {
   tags = var.tags
 }
 
-resource "aws_route53_record" "cp-node" {
+resource "aws_route53_record" "proxy_cp_node" {
   zone_id = aws_route53_zone.local.zone_id
   name    = "cp.${var.local_domain}"
   type    = "A"
   ttl     = "300"
-  records = [aws_instance.cp-node.private_ip]
+  records = [aws_instance.cp_proxy.private_ip]
 }
+
+resource "aws_route53_record" "main_cp_node" {
+  zone_id = aws_route53_zone.local.zone_id
+  name    = "cp-0.${var.local_domain}"
+  type    = "A"
+  ttl     = "300"
+  records = [aws_instance.main_cp-node.private_ip]
+}
+
+#resource "aws_route53_record" "cp-nodes" {
+#  count = var.number_additional_cp
+#
+#  zone_id = aws_route53_zone.local.zone_id
+#  name    = "cp-${count.index}.${var.local_domain}"
+#  type    = "A"
+#  ttl     = "300"
+#  records = [aws_instance.cp-nodes[count.index].private_ip]
+#}
 
 resource "aws_route53_record" "worker-nodes" {
   count = var.number_workers

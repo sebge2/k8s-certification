@@ -16,7 +16,8 @@ sh -x /home/ubuntu/init-node-scripts/init-nfs-server.sh >> /home/ubuntu/logs/ini
 
 sleep 120
 sh -x /home/ubuntu/init-node-scripts/init-cilium.sh >> /home/ubuntu/logs/init-cilium.log 2>&1
-sh -x /home/ubuntu/init-node-scripts/init-worker-join.sh ${numberWorkerNodes} >> /home/ubuntu/logs/init-worker-join.log 2>&1
+sh -x /home/ubuntu/init-node-scripts/init-cp-join.sh "${numberCpNodes}" >> /home/ubuntu/logs/init-cp-join.log 2>&1
+sh -x /home/ubuntu/init-node-scripts/init-worker-join.sh "${numberWorkerNodes}" >> /home/ubuntu/logs/init-worker-join.log 2>&1
 
 sh -x /home/ubuntu/init-node-scripts/init-metrics.sh >> /home/ubuntu/logs/init-metrics.log 2>&1
 sh -x /home/ubuntu/init-node-scripts/init-ingress-controller.sh >> /home/ubuntu/logs/init-ingress-controller.log 2>&1
