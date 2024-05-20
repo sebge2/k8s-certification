@@ -154,6 +154,14 @@ resource "aws_security_group" "cp-proxy" {
   description = "Security group that allows connections to Control Plane proxy"
 
   ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = [aws_security_group.node.id]
+    description     = "Allow all inside the cluster"
+  }
+
+  ingress {
     from_port   = 9999
     to_port     = 9999
     protocol    = "TCP"
