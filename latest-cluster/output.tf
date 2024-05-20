@@ -2,6 +2,10 @@ output "main_cp_node_connection_command" {
   value = "ssh -o StrictHostKeyChecking=no -i ~/.aws/k8-certification/node ubuntu@${aws_instance.main_cp-node.public_dns}"
 }
 
+output "additional_cp_nodes_connection_command" {
+  value = [for cp in aws_instance.additional_cp-nodes : format("ssh -o StrictHostKeyChecking=no -i ~/.aws/k8-certification/node ubuntu@%s", cp.public_dns)]
+}
+
 output "cp_proxy_connection_command" {
   value = "ssh -o StrictHostKeyChecking=no -i ~/.aws/k8-certification/node ubuntu@${aws_instance.cp_proxy.public_dns}"
 }
