@@ -19,7 +19,7 @@ wait_node "cp-0"
 
 UPLOAD_CERT=$(sudo kubeadm init phase upload-certs --upload-certs)
 echo "$UPLOAD_CERT"
-CERTIFICATE_KEY=$(echo "$UPLOAD_CERT" | cut -d " " -f 16 | sed 's/\r//')
+CERTIFICATE_KEY=$(echo "$UPLOAD_CERT" | cut -d " " -f 16 | tr -d '\n')
 
 if [ "$NUMBER_CP_NODES" -gt 1 ]; then
   echo "Provisioning more control plane nodes $NUMBER_CP_NODES."
