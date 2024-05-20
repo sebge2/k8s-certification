@@ -14,8 +14,6 @@ EOF
 # Start Control Plane
 sudo kubeadm init --config=/home/ubuntu/kubeadm-config.yaml --node-name=cp-0 --upload-certs | sudo tee /home/ubuntu/kubeadm-init.out
 
-sudo kubeadm init phase upload-certs --upload-certs
-
 # Setup Kube Config
 mkdir -p /home/ubuntu/.kube
 chmod 0700 /home/ubuntu/node.key

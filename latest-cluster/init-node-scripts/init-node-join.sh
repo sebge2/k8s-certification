@@ -15,16 +15,20 @@ wait_node () {
   echo "Node ${NODE_NAME} ready."
 }
 
+wait_node "cp-0"
+
+UPLOAD_CERT=$(sudo kubeadm init phase upload-certs --upload-certs)
+echo "$UPLOAD_CERT"
+CERTIFICATE_KEY=$(echo "$UPLOAD_CERT" | sed -n 's/.*--certificate-key //p')
+
 if [ "$NUMBER_CP_NODES" -gt 1 ]; then
   echo "Provisioning more control plane nodes $NUMBER_CP_NODES."
-
-  wait_node "cp-0"
 
   END=$(($NUMBER_CP_NODES-1))
   for i in $(seq 1 "$END")
   do
     NODE="cp-$i"
-    JOIN_COMMAND=$(sh /home/ubuntu/init-node-scripts/join-cp-command-helper.sh "$i")
+    JOIN_COMMAND=$(sh /home/ubuntu/init-node-scripts/join-cp-command-helper.sh "$i" "$CERTIFICATE_KEY")
 
     echo "Initializing node $NODE."
 
